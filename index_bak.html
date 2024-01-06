@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>File Upload and Download Test</title>
+<style>
+    /* Add styles for the loading indicator */
+    #loadingIndicator {
+        display: none;
+    }
+</style>
+</head>
+<body>
+
+<input type="file" id="fileInput" />
+<button id="uploadBtn">Upload and Download Processed File</button>
+<!-- Add a loading indicator -->
+<div id="loadingIndicator">Processing...</div>
+
+<script>
+    document.getElementById('uploadBtn').addEventListener('click', function() {
+        const fileInput = document.getElementById('fileInput');
+        const file = fileInput.files[0];
+        const loadingIndicator = document.getElementById('loadingIndicator');
+
+        if (!file) {
+            alert('Please select a file to upload.');
+            return;
+        }
+
+        // Show loading indicator
+        loadingIndicator.style.display = 'block';
+
+        const formData = new FormData();
+        formData.append('file', file);
+
+        // Update the URL to point to your FastAPI server
+        fetch('http://127.0.0.1:8027/process_pdf/', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => {
+            // Hide loading indicator
+            loadingIndicator.style.display = 'none';
+
+            if (!response.ok) {
+                throw new Error(`Server returned ${response.status}: ${response.statusText}`);
+            }
+            return response.blob();
+        })
+        .then(blob => {
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.style.display = 'none';
+            a.href = url;
+            a.download = 'podcast_summary_notes.txt'; // Use a static name for testing
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            a.remove();
+        })
+        .catch(error => {
+            // Hide loading indicator
+            loadingIndicator.style.display = 'none';
+            console.error('Upload failed:', error);
+        });
+    });
+</script>
+
+</body>
+</html>

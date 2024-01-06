@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Simple File Upload Test</title>
+</head>
+<body>
+    <form id="uploadForm" action="http://127.0.0.1:8028/process_pdf/" method="post" enctype="multipart/form-data" onsubmit="handleSubmit(event)">
+        <input type="file" name="file" id="fileInput" required />
+        <input type="submit" value="Upload File" />
+    </form>
+    
+    <script>
+    function handleSubmit(event) {
+        event.preventDefault(); // This will prevent the default form submission
+        const form = document.getElementById('uploadForm');
+        const formData = new FormData(form);
+    
+        // Perform the fetch inside this function without reloading the page
+        fetch(form.action, {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`Server returned ${response.status}: ${response.statusText}`);
+            }
+            return response.blob();
+        })
+        .then(blob => {
+            // Handle the response blob (e.g., download the file)
+        })
+        .catch(error => {
+            console.error('Upload failed:', error);
+        });
+    }
+    </script>
+</body>
+</html>
